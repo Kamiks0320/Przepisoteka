@@ -1,0 +1,6 @@
+@przepisy_HostAddress = http://localhost:5220
+
+GET {{przepisy_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
