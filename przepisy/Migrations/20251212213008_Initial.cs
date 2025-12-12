@@ -12,7 +12,7 @@ namespace przepisy.Migrations
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.CreateTable(
-                name: "Users",
+                name: "Ingredient",
                 columns: table => new
                 {
                     Id = table.Column<int>(type: "integer", nullable: false)
@@ -21,7 +21,7 @@ namespace przepisy.Migrations
                 },
                 constraints: table =>
                 {
-                    table.PrimaryKey("PK_Users", x => x.Id);
+                    table.PrimaryKey("PK_Ingredient", x => x.Id);
                 });
 
             migrationBuilder.CreateTable(
@@ -31,23 +31,24 @@ namespace przepisy.Migrations
                     Id = table.Column<int>(type: "integer", nullable: false)
                         .Annotation("Npgsql:ValueGenerationStrategy", NpgsqlValueGenerationStrategy.IdentityByDefaultColumn),
                     Name = table.Column<string>(type: "text", nullable: false),
-                    UserId = table.Column<int>(type: "integer", nullable: false)
+                    Description = table.Column<string>(type: "text", nullable: false),
+                    IngredientId = table.Column<int>(type: "integer", nullable: false)
                 },
                 constraints: table =>
                 {
                     table.PrimaryKey("PK_Recipes", x => x.Id);
                     table.ForeignKey(
-                        name: "FK_Recipes_Users_UserId",
-                        column: x => x.UserId,
-                        principalTable: "Users",
+                        name: "FK_Recipes_Ingredient_IngredientId",
+                        column: x => x.IngredientId,
+                        principalTable: "Ingredient",
                         principalColumn: "Id",
                         onDelete: ReferentialAction.Cascade);
                 });
 
             migrationBuilder.CreateIndex(
-                name: "IX_Recipes_UserId",
+                name: "IX_Recipes_IngredientId",
                 table: "Recipes",
-                column: "UserId");
+                column: "IngredientId");
         }
 
         /// <inheritdoc />
@@ -57,7 +58,7 @@ namespace przepisy.Migrations
                 name: "Recipes");
 
             migrationBuilder.DropTable(
-                name: "Users");
+                name: "Ingredient");
         }
     }
 }

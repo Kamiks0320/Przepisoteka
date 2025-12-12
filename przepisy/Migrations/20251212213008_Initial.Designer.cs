@@ -11,7 +11,7 @@ using przepisy.Data;
 namespace przepisy.Migrations
 {
     [DbContext(typeof(AppDbContext))]
-    [Migration("20251201200906_Initial")]
+    [Migration("20251212213008_Initial")]
     partial class Initial
     {
         /// <inheritdoc />
@@ -24,7 +24,7 @@ namespace przepisy.Migrations
 
             NpgsqlModelBuilderExtensions.UseIdentityByDefaultColumns(modelBuilder);
 
-            modelBuilder.Entity("przepisy.Models.Recipe", b =>
+            modelBuilder.Entity("przepisy.Models.Ingredient", b =>
                 {
                     b.Property<int>("Id")
                         .ValueGeneratedOnAdd()
@@ -36,42 +36,46 @@ namespace przepisy.Migrations
                         .IsRequired()
                         .HasColumnType("text");
 
-                    b.Property<int>("UserId")
+                    b.HasKey("Id");
+
+                    b.ToTable("Ingredient");
+                });
+
+            modelBuilder.Entity("przepisy.Models.Recipe", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
                         .HasColumnType("integer");
+
+                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .IsRequired()
+                        .HasColumnType("text");
+
+                    b.Property<int>("IngredientId")
+                        .HasColumnType("integer");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("text");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("IngredientId");
 
                     b.ToTable("Recipes");
                 });
 
-            modelBuilder.Entity("przepisy.Models.Users", b =>
-                {
-                    b.Property<int>("Id")
-                        .ValueGeneratedOnAdd()
-                        .HasColumnType("integer");
-
-                    NpgsqlPropertyBuilderExtensions.UseIdentityByDefaultColumn(b.Property<int>("Id"));
-
-                    b.Property<string>("Name")
-                        .IsRequired()
-                        .HasColumnType("text");
-
-                    b.HasKey("Id");
-
-                    b.ToTable("Users");
-                });
-
             modelBuilder.Entity("przepisy.Models.Recipe", b =>
                 {
-                    b.HasOne("przepisy.Models.Users", "User")
+                    b.HasOne("przepisy.Models.Ingredient", "Ingredient")
                         .WithMany()
-                        .HasForeignKey("UserId")
+                        .HasForeignKey("IngredientId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.Navigation("User");
+                    b.Navigation("Ingredient");
                 });
 #pragma warning restore 612, 618
         }
