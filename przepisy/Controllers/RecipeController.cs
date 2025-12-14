@@ -13,11 +13,25 @@ namespace przepisy.Controllers
             this.context = context;
         }
 
-        [HttpGet]
+        [HttpGet("GetAll")]
         public IActionResult GetRecipes()
         {
-            var recipes = this.context.Recipes.ToList();
-            return Ok(recipes);
+            try
+            {
+                var recipes = this.context.Recipes.ToList();
+                return Ok(recipes);
+            }
+            catch (Exception ex)
+            {
+                return BadRequest(ex.Message);
+            }
         }
+
+        /*[HttpGet("GetById/{RecipeId: Guid}")]
+        public IActionResult GetRecipeById(Guid RecipeId)
+        {
+            var recipe = ;
+            return Ok(recipe);
+        }*/
     }
 }

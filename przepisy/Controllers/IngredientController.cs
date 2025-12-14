@@ -16,7 +16,7 @@ namespace przepisy.Controllers
         [HttpGet]
         public IActionResult GetIngredients()
         {
-            var ingredients = this.context.Ingredients.ToList();
+            var ingredients = this.context.Ingredient.ToList();
             return Ok(ingredients);
         }
     }
