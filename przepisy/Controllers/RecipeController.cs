@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
+using przepisy.DTO.Recipe;
 
 namespace przepisy.Controllers
 {
@@ -13,25 +15,40 @@ namespace przepisy.Controllers
             this.context = context;
         }
 
-        [HttpGet("GetAll")]
+        [HttpGet]
         public IActionResult GetRecipes()
         {
-            try
+            var recipes = context.Recipes.Include(r => r.Ingredients).ToList();
+
+            //if(recipes == null) return NotFound(); 
+
+            var dtos = recipes.Select(recipe => new RecipeReadDTO
             {
-                var recipes = this.context.Recipes.ToList();
-                return Ok(recipes);
-            }
-            catch (Exception ex)
-            {
-                return BadRequest(ex.Message);
-            }
+                Id = recipe.PublicId,
+                Name = recipe.Name,
+                Description = recipe.Description,
+                Ingredients = recipe.Ingredients.Select(i => i.Name).ToList()
+            }).ToList();
+
+            return Ok(dtos);
         }
 
-        /*[HttpGet("GetById/{RecipeId: Guid}")]
+        [HttpGet("{RecipeId}")]
         public IActionResult GetRecipeById(Guid RecipeId)
         {
-            var recipe = ;
-            return Ok(recipe);
-        }*/
+            var recipe = context.Recipes.Include(r => r.Ingredients).FirstOrDefault(r => r.PublicId == RecipeId);
+
+            if(recipe == null) return NotFound();
+
+            var dto = new RecipeReadDTO
+            {
+                Id = recipe.PublicId,
+                Name = recipe.Name,
+                Description = recipe.Description,
+                Ingredients = recipe.Ingredients.Select(i => i.Name).ToList()
+            };
+
+            return Ok(dto);
+        }
     }
 }
