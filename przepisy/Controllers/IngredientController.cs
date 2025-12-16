@@ -1,5 +1,7 @@
 ﻿using Microsoft.AspNetCore.Mvc;
+using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
+using przepisy.DTO.Ingredient;
 
 namespace przepisy.Controllers
 {
@@ -16,8 +18,33 @@ namespace przepisy.Controllers
         [HttpGet]
         public IActionResult GetIngredients()
         {
-            var ingredients = this.context.Ingredient.ToList();
-            return Ok(ingredients);
+            var ingredients = context.Ingredient.ToList();
+            
+            if(ingredients.Count == 0) return NotFound(); //pewnie cos innego niz notfound, ale pozniej to zmienie
+
+            var dtos = ingredients.Select(ingredient => new IngredientReadDTO
+            {
+                Id = ingredient.PublicId,
+                Name = ingredient.Name
+            }).ToList();
+
+            return Ok(dtos);
+        }
+
+        [HttpGet("{IngredientId}")]
+        public IActionResult GetIngredientsById(Guid IngredientId)
+        {
+            var ingredient = context.Ingredient.FirstOrDefault(i => i.PublicId == IngredientId);
+
+            if (ingredient == null) return NotFound();
+
+            var dto = new IngredientReadDTO
+            {
+                Id = ingredient.PublicId,
+                Name = ingredient.Name
+            };
+
+            return Ok(dto);
         }
     }
 }

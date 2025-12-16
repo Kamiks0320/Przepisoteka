@@ -20,7 +20,7 @@ namespace przepisy.Controllers
         {
             var recipes = context.Recipes.Include(r => r.Ingredients).ToList();
 
-            //if(recipes == null) return NotFound(); 
+            if(recipes.Count == 0) return NotFound(); //pewnie cos innego niz notfound, ale pozniej to zmienie
 
             var dtos = recipes.Select(recipe => new RecipeReadDTO
             {
@@ -50,5 +50,11 @@ namespace przepisy.Controllers
 
             return Ok(dto);
         }
+
+        /*[HttpPost]
+        public IActionResult CreateRecipe(RecipeCreateDTO dto)
+        {
+
+        }*/
     }
 }
