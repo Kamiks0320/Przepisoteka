@@ -1,6 +1,7 @@
 using Microsoft.AspNetCore.Authentication.Negotiate;
-using przepisy.Data;
 using Microsoft.EntityFrameworkCore;
+using przepisy.Data;
+using przepisy.Services;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -9,6 +10,9 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("DefaultConnection")));
 
 builder.Services.AddControllers();
+
+builder.Services.AddScoped<RecipeService>();
+
 // Learn more about configuring OpenAPI at https://aka.ms/aspnet/openapi
 builder.Services.AddOpenApi();
 

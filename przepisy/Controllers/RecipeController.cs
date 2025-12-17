@@ -2,6 +2,7 @@
 using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
 using przepisy.DTO.Recipe;
+using przepisy.Services;
 
 namespace przepisy.Controllers
 {
@@ -51,10 +52,22 @@ namespace przepisy.Controllers
             return Ok(dto);
         }
 
-        /*[HttpPost]
-        public IActionResult CreateRecipe(RecipeCreateDTO dto)
+        private readonly RecipeService _recipeService;
+        public RecipeController(RecipeService recipeService)
         {
+            _recipeService = recipeService;
+        }
 
-        }*/
+        [HttpPost]
+        public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
+        {
+            var recipe = await _recipeService.CreateRecipeAsync(
+                dto.Name,
+                dto.Description,
+                dto.IngredientIds
+                );
+
+            return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.PublicId }, null);
+        }
     }
 }
