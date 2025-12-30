@@ -1,7 +1,9 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
 using przepisy.DTO.Recipe;
+using przepisy.Models;
 using przepisy.Services;
 
 namespace przepisy.Controllers
@@ -16,6 +18,7 @@ namespace przepisy.Controllers
             this.context = context;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetRecipes()
         {
@@ -52,22 +55,47 @@ namespace przepisy.Controllers
             return Ok(dto);
         }
 
-        private readonly RecipeService _recipeService;
-        public RecipeController(RecipeService recipeService)
-        {
-            _recipeService = recipeService;
-        }
-
+        [AllowAnonymous]
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
         {
-            var recipe = await _recipeService.CreateRecipeAsync(
-                dto.Name,
-                dto.Description,
-                dto.IngredientIds
-                );
+            //normalizacja nazw skladnikow
+            var normalizedNames = dto.IngredientNames.Select(n => n.Trim().ToLowerInvariant()).Where(n => n != "").Distinct().ToList();
 
-            return CreatedAtAction(nameof(GetRecipeById), new { id = recipe.PublicId }, null);
+            //pobranie istniejacych skladnikow
+            var existingIngredients = await context.Ingredient.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
+
+            //sprawdzenie, ktore skladniki juz istnieja
+            var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();
+
+            //stworzenie nowych skladnikow
+            var newIngredients = normalizedNames.Where(n => !existingNames.Contains(n)).Select(n => new Ingredient
+            {
+                PublicId = Guid.NewGuid(),
+                Name = n
+            }).ToList();
+
+            //dodanie nowych skladnikow do kontekstu
+            context.Ingredient.AddRange(newIngredients);
+
+            //stworzenie nowego przepisu
+            var recipe = new Recipe
+            {
+                PublicId = Guid.NewGuid(),
+                Name = dto.Name.Trim(),
+                Description = dto.Description,
+                Ingredients = existingIngredients.Concat(newIngredients).ToList()
+            };
+
+            //dodanie przepisu do kontekstu
+            context.Recipes.Add(recipe);
+
+            //zapis
+            await context.SaveChangesAsync();
+
+            return CreatedAtAction(nameof(GetRecipeById), 
+                new { id = recipe.PublicId }, 
+                null);
         }
     }
 }
