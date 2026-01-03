@@ -4,7 +4,6 @@ using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
 using przepisy.DTO.Recipe;
 using przepisy.Models;
-using przepisy.Services;
 
 namespace przepisy.Controllers
 {
@@ -59,8 +58,13 @@ namespace przepisy.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
         {
-            //normalizacja nazw skladnikow
+            //walidacja nazwy przepisu
+            var recipeName = dto.Name.Trim();
+            if (string.IsNullOrWhiteSpace(recipeName)) return BadRequest("Recipe name cannot be empty.");
+
+            //normalizacja nazw skladnikow i walidacja
             var normalizedNames = dto.IngredientNames.Select(n => n.Trim().ToLowerInvariant()).Where(n => n != "").Distinct().ToList();
+            if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
 
             //pobranie istniejacych skladnikow
             var existingIngredients = await context.Ingredient.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
@@ -94,7 +98,7 @@ namespace przepisy.Controllers
             await context.SaveChangesAsync();
 
             return CreatedAtAction(nameof(GetRecipeById), 
-                new { id = recipe.PublicId }, 
+                new { RecipeId = recipe.PublicId }, 
                 null);
         }
     }

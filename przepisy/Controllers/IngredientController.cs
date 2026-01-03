@@ -1,4 +1,5 @@
-﻿using Microsoft.AspNetCore.Mvc;
+﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
 using przepisy.DTO.Ingredient;
@@ -15,6 +16,7 @@ namespace przepisy.Controllers
             this.context = context;
         }
 
+        [AllowAnonymous]
         [HttpGet]
         public IActionResult GetIngredients()
         {
