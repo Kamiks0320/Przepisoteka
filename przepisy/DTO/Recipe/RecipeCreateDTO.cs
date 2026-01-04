@@ -13,7 +13,7 @@ namespace przepisy.DTO.Recipe
         public string Description { get; set; }
 
         [Required]
-        [MinLength(2)]
+        [MinLength(1)]
         public List<string> IngredientNames { get; set; }
     }
 }

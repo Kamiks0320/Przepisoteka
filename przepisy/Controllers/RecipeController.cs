@@ -23,7 +23,7 @@ namespace przepisy.Controllers
         {
             var recipes = context.Recipes.Include(r => r.Ingredients).ToList();
 
-            if(recipes.Count == 0) return NotFound(); //pewnie cos innego niz notfound, ale pozniej to zmienie
+            if(recipes.Count == 0) return NotFound();
 
             var dtos = recipes.Select(recipe => new RecipeReadDTO
             {
@@ -100,6 +100,58 @@ namespace przepisy.Controllers
             return CreatedAtAction(nameof(GetRecipeById), 
                 new { RecipeId = recipe.PublicId }, 
                 null);
+        }
+
+        [AllowAnonymous]
+        [HttpPut("{id}")]
+        public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeCreateDTO dto)
+        {
+            var recipe = await context.Recipes.Include(r => r.Ingredients).FirstOrDefaultAsync(r => r.PublicId == id);
+
+            if (recipe == null) return NotFound();
+
+            //walidacja nazwy przepisu
+            var recipeName = dto.Name.Trim();
+            if (string.IsNullOrWhiteSpace(recipeName)) return BadRequest("Recipe name cannot be empty.");
+
+            //normalizacja nazw skladnikow i walidacja
+            var normalizedNames = dto.IngredientNames.Select(n => n.Trim().ToLowerInvariant()).Where(n => n != "").Distinct().ToList();
+            if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
+
+            //pobranie istniejacych skladnikow
+            var existingIngredients = await context.Ingredient.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
+
+            //sprawdzenie, ktore skladniki juz istnieja
+            var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();
+
+            //stworzenie nowych skladnikow
+            var newIngredients = normalizedNames.Where(n => !existingNames.Contains(n)).Select(n => new Ingredient
+            {
+                PublicId = Guid.NewGuid(),
+                Name = n
+            }).ToList();
+
+            recipe.Name = recipeName;
+            recipe.Description = dto.Description;
+            recipe.Ingredients = existingIngredients.Concat(newIngredients).ToList();
+
+            await context.SaveChangesAsync();
+
+            return NoContent();
+        }
+
+        [AllowAnonymous]
+        [HttpDelete("{id}")]
+        public async Task<IActionResult> DeleteRecipe(Guid id)
+        {
+            var recipe = await context.Recipes.Include(r => r.Ingredients).FirstOrDefaultAsync(i => i.PublicId == id);
+
+            if (recipe == null) return NotFound();
+
+            context.Recipes.Remove(recipe);
+            await context.SaveChangesAsync();
+
+            return NoContent();
         }
     }
 }
