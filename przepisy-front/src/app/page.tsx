@@ -1,3 +1,5 @@
+import Link from "next/link";
+
 export default async function Home() {
   const res = await fetch("http://localhost:5220/api/recipe", {cache: "no-store"})
 
@@ -15,9 +17,7 @@ export default async function Home() {
             <h2 className="text-lg font-semibold">
               {recipe.name}
             </h2>
-            <p className="text-lg">
-              {recipe.description}
-            </p>
+            <Link href={`/recipes/${recipe.id}`} className="">Szczegóły</Link>
           </li>
         ))}
       </ul>

@@ -36,6 +36,7 @@ namespace przepisy.Controllers
             return Ok(dtos);
         }
 
+        [AllowAnonymous]
         [HttpGet("{RecipeId}")]
         public IActionResult GetRecipeById(Guid RecipeId)
         {
