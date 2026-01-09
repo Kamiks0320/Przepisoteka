@@ -1,3 +1,5 @@
+import DeleteRecipe from "./DeleteButton";
+
 type PageProps = {
   params: Promise< {
     id: string;
@@ -17,9 +19,10 @@ export default async function RecipePage({ params }: PageProps) {
             <p>{recipe.description}</p>
             <ul>
                 {recipe.ingredients.map((i: string) => (
-                    <div>{i}</div>
+                    <li key={i}>{i}</li>
                 ))}
             </ul>
+            <DeleteRecipe recipeId = {recipe.id} />
         </main>
   );
 }
