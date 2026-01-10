@@ -1,3 +1,5 @@
+import EditRecipeForm from "@/app/components/EditRecipeForm";
+
 type PageProps = {
     params: Promise<{id: string}>;
 };
@@ -17,7 +19,7 @@ export default async function EditRecipePage({ params }: PageProps) {
     <main className="p-6 max-w-xl">
       <h1 className="text-xl mb-4">Edytuj przepis</h1>
 
-      <EditRecipe recipe={recipe} />
+      <EditRecipeForm recipe={recipe} />
     </main>
   );
 }

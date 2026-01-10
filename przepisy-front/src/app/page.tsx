@@ -21,6 +21,8 @@ export default async function Home() {
           </li>
         ))}
       </ul>
+
+      <Link href={`/recipes/add`}>Dodaj przepis</Link>
     </main>
   );
 }

@@ -1,4 +1,5 @@
-import DeleteRecipe from "./DeleteButton";
+import Link from "next/link";
+import DeleteRecipe from "../../components/DeleteRecipe";
 
 type PageProps = {
   params: Promise< {
@@ -23,6 +24,7 @@ export default async function RecipePage({ params }: PageProps) {
                 ))}
             </ul>
             <DeleteRecipe recipeId = {recipe.id} />
+            <Link href={`/recipes/${recipe.id}/edit`} className="">Edytuj</Link>
         </main>
   );
 }
