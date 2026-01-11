@@ -10,19 +10,43 @@ type Props = {
 export default function EditRecipeForm({recipe}: Props) {
     const router = useRouter();
 
-    //stale do przechwycenia i 
-    const [name, setName] = useState(recipe.name);
-    const [description, setDescription] = useState(recipe.description);
-    const [ingredients, setIngredients] = useState(recipe.ingredients.join(", "));
+    const [name, setName] = useState<string>(recipe.name);
+    const [description, setDescription] = useState<string>(recipe.description);
+    const [ingredients, setIngredients] = useState<string>(recipe.ingredients.join(", "));
+    const [error, setError] = useState<string | null>(null)
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
 
-        await fetch(`http://localhost:5220/api/recipe/${recipe.id}`, {
+        //walidacja na froncie
+        if(name.trim().length === 0) {
+            setError("Nazwa przepisu jest wymagana");
+            return;
+        }
+        if(description.trim().length === 0) {
+            setError("Opis jest wymagany");
+            return;
+        }
+        const ingredientList = ingredients
+            .split(",")
+            .map(i => i.trim())
+            .filter(i => i.length > 0);
+        if(ingredientList.length === 0) {
+            setError("Co najmniej jeden składnik jest wymagany");
+            return;
+        }
+
+        const res = await fetch(`http://localhost:5220/api/recipe/${recipe.id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json"},
             body: JSON.stringify({name, description, ingredientNames: ingredients.split(","),}),
         });
+
+        if (!res.ok) {
+            const text = await res.text();
+            setError(`Błąd backendu: ${res.status} - ${text}`);
+            return;
+        }
 
         router.push(`/recipes/${recipe.id}`);
     }
@@ -46,6 +70,12 @@ export default function EditRecipeForm({recipe}: Props) {
                 className="border p-2 w-full" 
                 placeholder="składniki po przecinku" 
             />
+
+            {error && (
+                <p className="text-red-600 font-medium">
+                    {error}
+                </p>
+            )}
 
             <button className="bg-blue-600 px-4 py-2 rounded text-white">Zapisz</button>
         </form>
