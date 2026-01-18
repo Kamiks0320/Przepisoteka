@@ -20,9 +20,9 @@ namespace przepisy.Controllers
         [HttpGet]
         public IActionResult GetIngredients()
         {
-            var ingredients = context.Ingredient.ToList();
+            var ingredients = context.Ingredients.ToList();
             
-            if(ingredients.Count == 0) return NotFound(); //pewnie cos innego niz notfound, ale pozniej to zmienie
+            if(ingredients.Count == 0) return NotFound();
 
             var dtos = ingredients.Select(ingredient => new IngredientReadDTO
             {
@@ -36,7 +36,7 @@ namespace przepisy.Controllers
         [HttpGet("{IngredientId}")]
         public IActionResult GetIngredientsById(Guid IngredientId)
         {
-            var ingredient = context.Ingredient.FirstOrDefault(i => i.PublicId == IngredientId);
+            var ingredient = context.Ingredients.FirstOrDefault(i => i.PublicId == IngredientId);
 
             if (ingredient == null) return NotFound();
 

@@ -68,7 +68,7 @@ namespace przepisy.Controllers
             if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
 
             //pobranie istniejacych skladnikow
-            var existingIngredients = await context.Ingredient.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
+            var existingIngredients = await context.Ingredients.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
 
             //sprawdzenie, ktore skladniki juz istnieja
             var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();
@@ -81,7 +81,7 @@ namespace przepisy.Controllers
             }).ToList();
 
             //dodanie nowych skladnikow do kontekstu
-            context.Ingredient.AddRange(newIngredients);
+            context.Ingredients.AddRange(newIngredients);
 
             //stworzenie nowego przepisu
             var recipe = new Recipe
@@ -120,7 +120,7 @@ namespace przepisy.Controllers
             if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
 
             //pobranie istniejacych skladnikow
-            var existingIngredients = await context.Ingredient.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
+            var existingIngredients = await context.Ingredients.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
 
             //sprawdzenie, ktore skladniki juz istnieja
             var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();

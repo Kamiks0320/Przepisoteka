@@ -6,7 +6,12 @@ export default async function Home() {
     fetch("http://localhost:5220/api/ingredient", {cache: "no-store"})
   ]);
 
-  if(!recipeRes.ok || !ingredientRes.ok) return <p>Błąd ładowania</p>
+  if(!recipeRes.ok || !ingredientRes.ok) return (
+  <p>Błąd ładowania
+    <Link href={`/recipes/add`}>Dodaj przepis</Link>
+  </p>
+  
+)
 
   const recipes = await recipeRes.json();
   const ingredients = await ingredientRes.json();
