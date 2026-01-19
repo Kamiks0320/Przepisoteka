@@ -55,7 +55,7 @@ namespace przepisy.Controllers
             return Ok(dto);
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
         {
@@ -103,7 +103,7 @@ namespace przepisy.Controllers
                 null);
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpPut("{id}")]
         public async Task<IActionResult> UpdateRecipe(Guid id, [FromBody] RecipeCreateDTO dto)
         {
@@ -141,7 +141,7 @@ namespace przepisy.Controllers
             return NoContent();
         }
 
-        [AllowAnonymous]
+        [Authorize]
         [HttpDelete("{id}")]
         public async Task<IActionResult> DeleteRecipe(Guid id)
         {

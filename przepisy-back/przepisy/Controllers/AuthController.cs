@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authorization;
+using Microsoft.AspNetCore.Components.Forms;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.IdentityModel.Tokens;
@@ -38,6 +39,8 @@ namespace przepisy.Controllers
 
             var result = await userManager.CreateAsync(user, dto.Password);
 
+            await userManager.AddToRoleAsync(user, "User");
+
             if (!result.Succeeded) return BadRequest(result.Errors);
 
             return Ok("Użytkownik utworzony");
@@ -52,26 +55,26 @@ namespace przepisy.Controllers
             var result = await userManager.CheckPasswordAsync(user, dto.Password);
             if (!result) return Unauthorized("Nieprawidłowe dane logowania");
 
-            var token = GenerateJwt(user);
+            var token = await GenerateJwt(user);
 
             return Ok(new {token});
         }
 
-        private string GenerateJwt(AppUser user)
+        private async Task<string> GenerateJwt(AppUser user)
         {
             var jwt = configuration.GetSection("Jwt");
+            var roles = await userManager.GetRolesAsync(user);
 
-            var claims = new[]
+            var claims = new List<Claim>
             {
                 new Claim(JwtRegisteredClaimNames.Sub, user.Id),
                 new Claim(JwtRegisteredClaimNames.Email, user.Email!),
                 new Claim("nick", user.Nick)
             };
 
-            var key = new SymmetricSecurityKey(
-                Encoding.UTF8.GetBytes(jwt["Key"]!)
-            );
+            foreach (var role in roles) claims.Add(new Claim(ClaimTypes.Role, role));
 
+            var key = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(jwt["Key"]!));
             var creds = new SigningCredentials(key, SecurityAlgorithms.HmacSha256);
 
             var token = new JwtSecurityToken(
