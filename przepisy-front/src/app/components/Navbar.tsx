@@ -7,7 +7,7 @@ export default function Navbar() {
                 <Link href="/" className="text-lg-font-semibold">Przepisoteka</Link>
 
                 <div className="flex gap-4">
-                    <Link href="/" className="hover:underline">Zaloguj się</Link>
+                    <Link href="/login" className="hover:underline">Zaloguj się</Link>
                     <Link href="/register" className="hover:underline">Utwórz konto</Link>
                 </div>
             </nav>

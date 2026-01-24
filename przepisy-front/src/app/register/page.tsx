@@ -56,7 +56,3 @@ export default function RegisterPage() {
         </form>
     )
 }
-
-function userRouter() {
-    throw new Error("Function not implemented.");
-}
