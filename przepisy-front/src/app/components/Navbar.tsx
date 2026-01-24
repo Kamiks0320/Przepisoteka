@@ -8,7 +8,7 @@ export default function Navbar() {
 
                 <div className="flex gap-4">
                     <Link href="/" className="hover:underline">Zaloguj się</Link>
-                    <Link href="/" className="hover:underline">Utwórz konto</Link>
+                    <Link href="/register" className="hover:underline">Utwórz konto</Link>
                 </div>
             </nav>
         </header>
