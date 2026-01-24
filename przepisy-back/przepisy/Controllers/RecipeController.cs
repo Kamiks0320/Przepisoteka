@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using przepisy.Data;
 using przepisy.DTO.Recipe;
 using przepisy.Models;
+using System.Security.Claims;
 
 namespace przepisy.Controllers
 {
@@ -15,6 +16,13 @@ namespace przepisy.Controllers
         public RecipeController(AppDbContext context)
         {
             this.context = context;
+        }
+
+        private bool WhoCanModify(Recipe recipe)
+        {
+            if (User.IsInRole("Administrator") || User.IsInRole("Moderator")) return true;
+
+            return recipe.OwnerId == User.FindFirstValue(ClaimTypes.NameIdentifier);
         }
 
         [AllowAnonymous]
@@ -55,6 +63,18 @@ namespace przepisy.Controllers
             return Ok(dto);
         }
 
+        [HttpGet("mine")]
+        public async Task<IActionResult> GetMine()
+        {
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+
+            if(userId == null) return Unauthorized();
+
+            var recipes = await context.Recipes.Where(r => r.OwnerId == userId).ToListAsync();
+
+            return Ok(recipes);
+        }
+
         [Authorize]
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
@@ -83,13 +103,18 @@ namespace przepisy.Controllers
             //dodanie nowych skladnikow do kontekstu
             context.Ingredients.AddRange(newIngredients);
 
+            //uzytkownik wlascicielem
+            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+            if (userId == null) return Unauthorized();
+
             //stworzenie nowego przepisu
             var recipe = new Recipe
             {
                 PublicId = Guid.NewGuid(),
                 Name = dto.Name.Trim(),
                 Description = dto.Description,
-                Ingredients = existingIngredients.Concat(newIngredients).ToList()
+                Ingredients = existingIngredients.Concat(newIngredients).ToList(),
+                OwnerId = userId
             };
 
             //dodanie przepisu do kontekstu
@@ -110,6 +135,7 @@ namespace przepisy.Controllers
             var recipe = await context.Recipes.Include(r => r.Ingredients).FirstOrDefaultAsync(r => r.PublicId == id);
 
             if (recipe == null) return NotFound();
+            if (!WhoCanModify(recipe)) return Forbid();
 
             //walidacja nazwy przepisu
             var recipeName = dto.Name.Trim();
@@ -148,6 +174,7 @@ namespace przepisy.Controllers
             var recipe = await context.Recipes.Include(r => r.Ingredients).FirstOrDefaultAsync(i => i.PublicId == id);
 
             if (recipe == null) return NotFound();
+            if (!WhoCanModify(recipe)) return Forbid();
 
             context.Recipes.Remove(recipe);
             await context.SaveChangesAsync();

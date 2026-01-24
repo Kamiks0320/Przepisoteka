@@ -7,5 +7,8 @@
         public string Name { get; set; } = "";
         public string Description { get; set; } = "";
         public List<Ingredient> Ingredients { get; set; } = new();
+
+        public string OwnerId { get; set; } = null!;
+        public AppUser Owner { get; set; } = null!;
     }
 }
