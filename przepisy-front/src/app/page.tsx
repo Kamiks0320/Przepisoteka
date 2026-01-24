@@ -1,6 +1,8 @@
 import Link from "next/link";
+import AddRecipeButton from "./components/AddRecipeButton";
 
 export default async function Home() {
+  
   const [recipeRes, ingredientRes] = await Promise.all([
     fetch("http://localhost:5220/api/recipe", {cache: "no-store"}),
     fetch("http://localhost:5220/api/ingredient", {cache: "no-store"})
@@ -8,9 +10,7 @@ export default async function Home() {
 
   if(!recipeRes.ok || !ingredientRes.ok) return (
   <p>Błąd ładowania
-    <Link href={`/recipes/add`}>Dodaj przepis</Link>
-  </p>
-  
+  <AddRecipeButton /></p>
 )
 
   const recipes = await recipeRes.json();
@@ -31,8 +31,7 @@ export default async function Home() {
             </li>
           ))}
         </ul>
-
-        <Link href={`/recipes/add`}>Dodaj przepis</Link>
+        <AddRecipeButton />
       </section>
 
       <section>
