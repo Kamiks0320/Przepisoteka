@@ -9,7 +9,7 @@ export default async function Home() {
   ]);
 
   if(!recipeRes.ok || !ingredientRes.ok) return (
-  <p>Błąd ładowania
+  <p>Błąd ładowania lub brak przepisów!
   <AddRecipeButton /></p>
 )
 

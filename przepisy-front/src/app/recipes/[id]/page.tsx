@@ -1,5 +1,6 @@
 import Link from "next/link";
 import DeleteRecipe from "../../components/DeleteRecipe";
+import UmbrellaDeleteEditRecipe from "@/app/components/UmbrellaDeleteEditRecipe";
 
 type PageProps = {
   params: Promise< {
@@ -17,14 +18,14 @@ export default async function RecipePage({ params }: PageProps) {
 
     return (
         <main className="p-6">
+            <h1 className="bold">{recipe.name}</h1>
             <p>{recipe.description}</p>
             <ul>
                 {recipe.ingredients.map((i: string) => (
                     <li key={i}>{i}</li>
                 ))}
             </ul>
-            <DeleteRecipe recipeId = {recipe.id} />
-            <Link href={`/recipes/${recipe.id}/edit`} className="">Edytuj</Link>
+            <UmbrellaDeleteEditRecipe recipeId={recipe.id} ownerId={recipe.ownerId} />
         </main>
   );
 }

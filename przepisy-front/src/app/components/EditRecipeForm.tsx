@@ -1,5 +1,6 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
 
@@ -9,6 +10,8 @@ type Props = {
 
 export default function EditRecipeForm({recipe}: Props) {
     const router = useRouter();
+    const {userId} = useAuth();
+    const isOwner = recipe.ownerId === userId;
 
     const [name, setName] = useState<string>(recipe.name);
     const [description, setDescription] = useState<string>(recipe.description);
@@ -36,9 +39,10 @@ export default function EditRecipeForm({recipe}: Props) {
             return;
         }
 
+        const token = localStorage.getItem("token");
         const res = await fetch(`http://localhost:5220/api/recipe/${recipe.id}`, {
             method: "PUT",
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             body: JSON.stringify({name, description, ingredientNames: ingredients.split(","),}),
         });
 

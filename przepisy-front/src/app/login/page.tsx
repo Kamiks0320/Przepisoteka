@@ -45,6 +45,8 @@ export default function LoginPage() {
             <input placeholder="Email" value={email} onChange={e => setEmail(e.target.value)} className="border p-2 w-full" />
             <input type="password" placeholder="Hasło" value={password} onChange={e => setPassword(e.target.value)} className="border p-2 w-full" />
 
+            {error && <p className="text-red-600">{error}</p>}
+
             <button onClick={handleSubmit} className="bg-blue-600 text-white px-4 py-2 rounded">Zaloguj się</button>
         </form>
     )

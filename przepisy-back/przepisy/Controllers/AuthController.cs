@@ -50,7 +50,7 @@ namespace przepisy.Controllers
         public async Task<IActionResult> Login(LoginDTO dto)
         {
             var user = await userManager.FindByEmailAsync(dto.Email);
-            if (user == null) return Unauthorized("Nieprawidłode dane logowania");
+            if (user == null) return Unauthorized("Nieprawidłowe dane logowania");
 
             var result = await userManager.CheckPasswordAsync(user, dto.Password);
             if (!result) return Unauthorized("Nieprawidłowe dane logowania");

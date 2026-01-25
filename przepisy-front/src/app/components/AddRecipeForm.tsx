@@ -1,15 +1,19 @@
 "use client";
 
+import { useAuth } from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
 import { useState } from "react";
 
 export default function AddRecipeForm() {
     const router = useRouter();
+    const { isLoggedIn } = useAuth();
 
     const [name, setName] = useState<string>("");
     const [description, setDescription] = useState<string>("");
     const [ingredients, setIngredients] = useState<string>("");
     const [error, setError] = useState<string | null>(null);
+
+    if(!isLoggedIn) return <p>Musisz być zalogowany, aby dodać przepis!</p>
 
     async function handleSubmit(e: React.FormEvent) {
         e.preventDefault();
@@ -32,9 +36,10 @@ export default function AddRecipeForm() {
             return;
         }
 
+        const token = localStorage.getItem("token");
         const res = await fetch(`http://localhost:5220/api/recipe/`, {
             method: "POST",
-            headers: {"Content-Type": "application/json"},
+            headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             body: JSON.stringify({name, description, ingredientNames: ingredientList,})
         })
 

@@ -57,7 +57,8 @@ namespace przepisy.Controllers
                 Id = recipe.PublicId,
                 Name = recipe.Name,
                 Description = recipe.Description,
-                Ingredients = recipe.Ingredients.Select(i => i.Name).ToList()
+                Ingredients = recipe.Ingredients.Select(i => i.Name).ToList(),
+                OwnerId = recipe.OwnerId
             };
 
             return Ok(dto);
