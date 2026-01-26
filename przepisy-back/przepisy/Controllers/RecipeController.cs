@@ -80,53 +80,66 @@ namespace przepisy.Controllers
         [HttpPost]
         public async Task<IActionResult> CreateRecipe([FromBody] RecipeCreateDTO dto)
         {
-            //walidacja nazwy przepisu
-            var recipeName = dto.Name.Trim();
-            if (string.IsNullOrWhiteSpace(recipeName)) return BadRequest("Recipe name cannot be empty.");
+            using var transaction = await context.Database.BeginTransactionAsync();
 
-            //normalizacja nazw skladnikow i walidacja
-            var normalizedNames = dto.IngredientNames.Select(n => n.Trim().ToLowerInvariant()).Where(n => n != "").Distinct().ToList();
-            if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
-
-            //pobranie istniejacych skladnikow
-            var existingIngredients = await context.Ingredients.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
-
-            //sprawdzenie, ktore skladniki juz istnieja
-            var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();
-
-            //stworzenie nowych skladnikow
-            var newIngredients = normalizedNames.Where(n => !existingNames.Contains(n)).Select(n => new Ingredient
+            try
             {
-                PublicId = Guid.NewGuid(),
-                Name = n
-            }).ToList();
+                //walidacja nazwy przepisu
+                var recipeName = dto.Name.Trim();
+                if (string.IsNullOrWhiteSpace(recipeName)) return BadRequest("Recipe name cannot be empty.");
 
-            //dodanie nowych skladnikow do kontekstu
-            context.Ingredients.AddRange(newIngredients);
+                //normalizacja nazw skladnikow i walidacja
+                var normalizedNames = dto.IngredientNames.Select(n => n.Trim().ToLowerInvariant()).Where(n => n != "").Distinct().ToList();
+                if (normalizedNames.Count == 0) return BadRequest("Recipe must contain at least one ingredient.");
 
-            //uzytkownik wlascicielem
-            var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
-            if (userId == null) return Unauthorized();
+                //pobranie istniejacych skladnikow
+                var existingIngredients = await context.Ingredients.Where(i => normalizedNames.Contains(i.Name)).ToListAsync();
 
-            //stworzenie nowego przepisu
-            var recipe = new Recipe
+                //sprawdzenie, ktore skladniki juz istnieja
+                var existingNames = existingIngredients.Select(i => i.Name).ToHashSet();
+
+                //stworzenie nowych skladnikow
+                var newIngredients = normalizedNames.Where(n => !existingNames.Contains(n)).Select(n => new Ingredient
+                {
+                    PublicId = Guid.NewGuid(),
+                    Name = n
+                }).ToList();
+
+                //dodanie nowych skladnikow do kontekstu
+                context.Ingredients.AddRange(newIngredients);
+
+                //uzytkownik wlascicielem
+                var userId = User.FindFirstValue(ClaimTypes.NameIdentifier);
+                if (userId == null) return Unauthorized();
+
+                //stworzenie nowego przepisu
+                var recipe = new Recipe
+                {
+                    PublicId = Guid.NewGuid(),
+                    Name = dto.Name.Trim(),
+                    Description = dto.Description,
+                    Ingredients = existingIngredients.Concat(newIngredients).ToList(),
+                    OwnerId = userId
+                };
+
+                //dodanie przepisu do kontekstu
+                context.Recipes.Add(recipe);
+
+                //zapis
+                await context.SaveChangesAsync();
+
+                //zatwierdzenie transakcji
+                await transaction.CommitAsync();
+
+                return CreatedAtAction(nameof(GetRecipeById),
+                    new { RecipeId = recipe.PublicId },
+                    null);
+            }
+            catch
             {
-                PublicId = Guid.NewGuid(),
-                Name = dto.Name.Trim(),
-                Description = dto.Description,
-                Ingredients = existingIngredients.Concat(newIngredients).ToList(),
-                OwnerId = userId
-            };
-
-            //dodanie przepisu do kontekstu
-            context.Recipes.Add(recipe);
-
-            //zapis
-            await context.SaveChangesAsync();
-
-            return CreatedAtAction(nameof(GetRecipeById), 
-                new { RecipeId = recipe.PublicId }, 
-                null);
+                await transaction.RollbackAsync();
+                throw;
+            }
         }
 
         [Authorize]
