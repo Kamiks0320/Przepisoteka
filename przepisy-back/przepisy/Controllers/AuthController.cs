@@ -26,7 +26,7 @@ namespace przepisy.Controllers
         }
 
         [HttpPost("register")]
-        public async Task<IActionResult> Register(AccCreateDTO dto)
+        public async Task<IActionResult> Register([FromBody]AccCreateDTO dto)
         {
             if (string.IsNullOrWhiteSpace(dto.Email) || string.IsNullOrWhiteSpace(dto.Password) || string.IsNullOrWhiteSpace(dto.Nick)) return BadRequest("");
 
@@ -39,9 +39,9 @@ namespace przepisy.Controllers
 
             var result = await userManager.CreateAsync(user, dto.Password);
 
-            await userManager.AddToRoleAsync(user, "User");
-
             if (!result.Succeeded) return BadRequest(result.Errors);
+
+            await userManager.AddToRoleAsync(user, "User");
 
             return Ok("Użytkownik utworzony");
         }

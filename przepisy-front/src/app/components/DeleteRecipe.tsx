@@ -1,6 +1,7 @@
 "use client";
 
 import { useRouter } from "next/navigation";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Props = {
     recipeId: string;
@@ -11,7 +12,7 @@ export default function DeleteRecipe({recipeId}: Props) {
     const token = localStorage.getItem("token");
 
     async function handleDelete(){
-        const res = await fetch(`http://localhost:5220/api/recipe/${recipeId}`, {
+        const res = await fetch(`${API_URL}/api/recipe/${recipeId}`, {
             method:"DELETE",
             headers: {"Authorization": `Bearer ${token}`}
         },);

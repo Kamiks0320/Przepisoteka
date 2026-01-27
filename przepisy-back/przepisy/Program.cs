@@ -5,6 +5,8 @@ using Microsoft.IdentityModel.Tokens;
 using przepisy.Data;
 using przepisy.Models;
 using System.Text;
+using Microsoft.AspNetCore.Identity;
+
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -48,7 +50,7 @@ builder.Services.AddCors(options =>
     options.AddPolicy("FrontendPolicy", policy =>
     {
         policy
-            .WithOrigins("http://localhost:3000")
+            .AllowAnyOrigin()
             .AllowAnyHeader()
             .AllowAnyMethod();
     });
@@ -62,11 +64,52 @@ var app = builder.Build();
 
 using (var scope = app.Services.CreateScope())
 {
+    var services = scope.ServiceProvider;
+
+    var db = services.GetRequiredService<AppDbContext>();
+    await db.Database.MigrateAsync();
+
     var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<IdentityRole>>();
+    var userManager = services.GetRequiredService<UserManager<AppUser>>();
 
     string[] roles = { "Administrator", "Moderator", "User" };
 
     foreach (var role in roles) if (!await roleManager.RoleExistsAsync(role)) await roleManager.CreateAsync(new IdentityRole(role));
+
+    var adminEmail = "admin@gmail.com";
+    var adminUser = await userManager.FindByEmailAsync(adminEmail);
+
+    if(adminUser == null)
+    {
+        adminUser = new AppUser
+        {
+            UserName = adminEmail,
+            Email = adminEmail,
+            Nick = "admin",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(adminUser, "Admin1!");
+        if (result.Succeeded)
+            await userManager.AddToRoleAsync(adminUser, "Administrator");
+    }
+
+    var modEmail = "moderator@gmail.com";
+    var modUser = await userManager.FindByEmailAsync(modEmail);
+
+    if (modUser == null)
+    {
+        modUser = new AppUser
+        {
+            UserName = modEmail,
+            Email = modEmail,
+            Nick = "moderator",
+            EmailConfirmed = true
+        };
+
+        var result = await userManager.CreateAsync(modUser, "Moderator1!");
+        if (result.Succeeded) await userManager.AddToRoleAsync(modUser, "Moderator");
+    }
 }
 
 // Configure the HTTP request pipeline.

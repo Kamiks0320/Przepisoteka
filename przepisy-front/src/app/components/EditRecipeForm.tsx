@@ -3,6 +3,7 @@
 import { useAuth } from "@/hooks/useAuth";
 import {useRouter} from "next/navigation";
 import {useState} from "react";
+const API_URL = process.env.NEXT_PUBLIC_API_URL;
 
 type Props = {
     recipe: any;
@@ -40,7 +41,7 @@ export default function EditRecipeForm({recipe}: Props) {
         }
 
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:5220/api/recipe/${recipe.id}`, {
+        const res = await fetch(`${API_URL}/api/recipe/${recipe.id}`, {
             method: "PUT",
             headers: {"Content-Type": "application/json", "Authorization": `Bearer ${token}`},
             body: JSON.stringify({name, description, ingredientNames: ingredients.split(","),}),

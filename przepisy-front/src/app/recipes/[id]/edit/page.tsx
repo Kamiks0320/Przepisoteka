@@ -1,4 +1,5 @@
 import EditRecipeForm from "@/app/components/EditRecipeForm";
+const API_URL = process.env.INTERNAL_API_URL!;
 
 type PageProps = {
     params: Promise<{id: string}>;
@@ -7,7 +8,7 @@ type PageProps = {
 export default async function EditRecipePage({ params }: PageProps) {
   const { id } = await params;
 
-  const res = await fetch(`http://localhost:5220/api/recipe/${id}`, {
+  const res = await fetch(`${API_URL}/api/recipe/${id}`, {
     cache: "no-store",
   });
 

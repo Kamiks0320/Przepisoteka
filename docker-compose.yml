@@ -1,0 +1,52 @@
+version: "3.9"
+
+services:
+  postgres:
+    image: postgres:16
+    container_name: przepisy-postgres
+    restart: always
+    environment:
+      POSTGRES_DB: Recipes
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: haslo
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres -d Recipes"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  backend:
+    build:
+      context: ./przepisy-back/przepisy      # ← było ./server
+      dockerfile: Dockerfile
+    container_name: przepisy-backend
+    ports:
+      - "5220:5220"
+    environment:
+      ASPNETCORE_URLS: http://+:5220
+      ASPNETCORE_ENVIRONMENT: Development
+      ConnectionStrings__DefaultConnection: Host=postgres;Port=5432;Database=Recipes;Username=postgres;Password=haslo
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  frontend:
+    build:
+      context: ./przepisy-front          # ← było ./client
+      dockerfile: Dockerfile
+    env_file:
+      - ./przepisy-front/.env
+    container_name: przepisy-frontend
+    ports:
+      - "3000:3000"
+    environment:
+      NEXT_PUBLIC_API_URL: http://backend:5220
+    depends_on:
+      - backend
+
+volumes:
+  postgres_data:

@@ -1,6 +1,5 @@
-import Link from "next/link";
-import DeleteRecipe from "../../components/DeleteRecipe";
 import UmbrellaDeleteEditRecipe from "@/app/components/UmbrellaDeleteEditRecipe";
+const API_URL = process.env.INTERNAL_API_URL!;
 
 type PageProps = {
   params: Promise< {
@@ -10,7 +9,7 @@ type PageProps = {
 
 export default async function RecipePage({ params }: PageProps) {
     const {id} = await params;
-    const res = await fetch(`http://localhost:5220/api/recipe/${id}`, {cache: "no-store"})
+    const res = await fetch(`${API_URL}/api/recipe/${id}`, {cache: "no-store"})
 
     if(!res.ok) return <p>Błąd {res.status}</p>
 

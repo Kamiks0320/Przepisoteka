@@ -1,13 +1,15 @@
 import Link from "next/link";
 import AddRecipeButton from "./components/AddRecipeButton";
+const API_URL = process.env.INTERNAL_API_URL!;
 
 export default async function Home() {
   
+  console.log("API URL =", API_URL);
   const [recipeRes, ingredientRes] = await Promise.all([
-    fetch("http://localhost:5220/api/recipe", {cache: "no-store"}),
-    fetch("http://localhost:5220/api/ingredient", {cache: "no-store"})
-  ]);
-
+    fetch(API_URL +"/api/recipe", {cache: "no-store"}),
+    fetch(API_URL +"/api/ingredient", {cache: "no-store"})])
+  
+  
   if(!recipeRes.ok || !ingredientRes.ok) return (
   <p>Błąd ładowania lub brak przepisów!
   <AddRecipeButton /></p>
